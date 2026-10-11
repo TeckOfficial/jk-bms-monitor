@@ -1,5 +1,9 @@
 # JK BMS Monitor
 
+[![tests](https://github.com/TeckOfficial/jk-bms-monitor/actions/workflows/tests.yml/badge.svg)](https://github.com/TeckOfficial/jk-bms-monitor/actions/workflows/tests.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
+
 A small web dashboard for a **JK BMS** read over **Bluetooth LE** – built for a
 Raspberry Pi sitting next to the battery, usable from any phone or computer on
 the home network.
@@ -44,7 +48,8 @@ pretend smart plugs so the Sockets tab can be tried too.
 ## Install on a Raspberry Pi
 
 Tested on a Raspberry Pi Zero 2 W with Raspberry Pi OS / Debian 13 (Python 3.13,
-BlueZ 5.82). Any Linux machine with Bluetooth LE should do.
+BlueZ 5.82). Any Linux machine with Bluetooth LE and Python 3.11 or newer
+should do.
 
 ```bash
 sudo apt install python3-venv bluetooth bluez

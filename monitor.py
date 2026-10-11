@@ -24,6 +24,8 @@ from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from jkbms import __version__
+
 BASE = pathlib.Path(__file__).resolve().parent
 WEB = BASE / "web"
 
@@ -38,6 +40,7 @@ class Monitor:
     def __init__(self, history_file: pathlib.Path | None, demo: bool = False) -> None:
         self.history_file = history_file
         self.state = {
+            "version": __version__,
             "connected": False,
             "last_update": None,
             "demo": demo,

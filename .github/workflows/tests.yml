@@ -1,0 +1,45 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Unit tests (need neither Bluetooth nor any package)
+        run: python -m unittest discover -s tests -v
+
+      - name: The dashboard starts in demo mode
+        run: |
+          pip install -r requirements.txt
+          python monitor.py --demo --port 8000 &
+          sleep 8
+          curl -fsS http://127.0.0.1:8000/ > /dev/null
+          curl -fsS http://127.0.0.1:8000/static/app.js > /dev/null
+          curl -fsS http://127.0.0.1:8000/api/status | python -c "
+          import json, sys
+          s = json.load(sys.stdin)
+          assert s['connected'] and s['demo'], s
+          assert 0 <= s['summary']['soc'] <= 100 and len(s['cells']) == 8, s
+          assert s['sockets']['enabled'] and len(s['sockets']['devices']) == 2, s
+          "
+          curl -fsS http://127.0.0.1:8000/api/history | python -c "
+          import json, sys
+          h = json.load(sys.stdin)
+          assert h['full'] and len(h['items']) > 1000, len(h['items'])
+          "

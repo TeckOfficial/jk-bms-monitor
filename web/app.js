@@ -20,6 +20,7 @@ const TEXTS = {
     cell_tip: "Cell {n}: {v} V", cell_tip_r: ", wire resistance {r} Ω",
     cell_tip_bad: " — MUCH HIGHER than the others, check the connection",
     device: "Device", model: "Model", serial: "Serial no.", mfg: "Manufactured", checksum_errors: "Checksum errors",
+    app_version: "Monitor version",
     cap_cycles: "Capacity & cycles", from_bms: "from BMS", nominal: "Nominal capacity", remaining: "Remaining",
     cycled: "Cycled", cycle_count: "Cycle count", runtime: "Running time", mos: "MOSFET chg / dis",
     bms_settings: "BMS settings", bal_from: "Balance from / delta", max_cd: "Max chg / dis",
@@ -49,6 +50,7 @@ const TEXTS = {
     cell_tip: "Článek {n}: {v} V", cell_tip_r: ", odpor vodiče {r} Ω",
     cell_tip_bad: " — VÝRAZNĚ VYŠŠÍ než ostatní, zkontroluj spoj",
     device: "Zařízení", model: "Model", serial: "Sériové č.", mfg: "Výroba", checksum_errors: "Chyby přenosu",
+    app_version: "Verze programu",
     cap_cycles: "Kapacita & cykly", from_bms: "z BMS", nominal: "Jmenovitá kapacita", remaining: "Zbývá",
     cycled: "Nacyklováno", cycle_count: "Počet cyklů", runtime: "Doba běhu", mos: "MOSFET nab. / vyb.",
     bms_settings: "Nastavení BMS", bal_from: "Balance od / delta", max_cd: "Max nab. / vyb.",
@@ -267,6 +269,7 @@ function render(patch){
   if(has("last_update")) renderStamp(state.last_update);
   if(has("sockets")) renderSockets(state.sockets);
   if(has("demo")) document.getElementById("demo-badge").hidden = !state.demo;
+  if(has("version")) setT("app-version", state.version);
 }
 function renderAll(){ render(state); }
 
