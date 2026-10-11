@@ -1,0 +1,3 @@
+# Linux line endings everywhere: the program runs on a Raspberry Pi
+* text=auto eol=lf
+*.png binary

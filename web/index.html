@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050810">
+<title>JK BMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="7" width="20" height="11" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+      <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+    </svg>JK BMS Monitor
+    <span class="badge demo-badge" id="demo-badge" hidden>DEMO</span>
+  </div>
+  <div class="hdr-right">
+    <span class="ts" id="last-update">—</span>
+    <div class="conn"><span class="dot off" id="conn-dot"></span><span id="conn-text" data-t="connecting">Connecting…</span></div>
+    <button class="lang" id="lang-btn" type="button" title="Language / Jazyk">EN</button>
+  </div>
+</header>
+
+<!-- Tabs for wide screens. Phones get the bottom bar at the end of body instead. -->
+<nav class="tabs" id="tabs-top"></nav>
+
+<main class="wrap">
+<div class="ebanner" id="error-banner" data-t="alarm">⚠ BMS reports an alarm</div>
+
+<!-- ══════════ OVERVIEW ══════════ -->
+<section class="tabpane" data-tab="overview">
+  <div class="card hero">
+    <div class="hero-g">
+      <div class="gw">
+        <svg class="gs" width="168" height="168" viewBox="0 0 168 168">
+          <circle class="gtrack" cx="84" cy="84" r="76"/>
+          <circle class="gfill" id="g-fill" cx="84" cy="84" r="76"/>
+        </svg>
+        <div class="gctr">
+          <div class="gpct"><span id="soc">--</span><span class="gsym">%</span></div>
+          <div class="gsub" data-t="soc_label">State of charge</div>
+        </div>
+      </div>
+      <div class="soc-row">
+        <div><div class="ss-v" id="capacity">--</div><div class="ss-l" data-t="capacity">Capacity</div></div>
+        <div><div class="ss-v" id="balance">--</div><div class="ss-l" data-t="balance">Balance</div></div>
+      </div>
+    </div>
+    <div class="pwr-stage" id="pwr-stage">
+      <div class="pwr-dir" id="pwr-dir">— —</div>
+      <div class="pwr-val" id="pwr-val"><span id="power">--</span><span class="u">W</span></div>
+      <div class="pwr-sub">
+        <span class="pill" id="current-pill"><span id="current">--</span><span class="u">A</span></span>
+        <span class="pill"><span id="total-v">--</span><span class="u">V</span></span>
+      </div>
+      <div class="cellsum">∑ <span id="sum-v">--</span> V · avg <span id="avg-v">--</span> V · Δ <span id="delta">--</span> mV</div>
+    </div>
+    <!-- Wide screens have room on the right for the key numbers from the other tabs. -->
+    <div class="hero-side">
+      <div class="hs"><span class="hs-k" data-t="remain">Remaining in battery</span><span class="hs-v" id="hero-remain">--</span></div>
+      <div class="hs"><span class="hs-k" data-t="cell_temp">Cell temperature</span><span class="hs-v" id="hero-temp">--</span></div>
+      <div class="hs"><span class="hs-k" data-t="cell_diff">Cell difference</span><span class="hs-v" id="hero-delta">--</span></div>
+      <div class="hs"><span class="hs-k" data-t="peak_today">Today's peak chg / dis</span><span class="hs-v" id="hero-peak">--</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chart-hdr">
+      <div class="clabel" style="margin-bottom:0" data-t="trend">Trend 24 h</div>
+      <div class="chart-meta">
+        <span class="chart-range" id="chart-range"></span>
+        <button class="chart-reset" id="chart-reset" onclick="chartReset()" data-t="reset">↺ Reset</button>
+        <div class="legend">
+          <span class="leg"><span class="leg-dot" style="background:#0ea5e9"></span>SOC</span>
+          <span class="leg"><span class="leg-dot" style="background:#34d399"></span><span data-t="leg_chg">Chg.</span></span>
+          <span class="leg"><span class="leg-dot" style="background:#fb923c"></span><span data-t="leg_dis">Dis.</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="trend-chart"></canvas>
+      <div class="chart-empty" id="chart-empty" data-t="chart_empty">Collecting data… (one sample per minute)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CELLS ══════════ -->
+<section class="tabpane" data-tab="cells">
+  <div class="card">
+    <div class="cells-hdr">
+      <div class="clabel" style="margin-bottom:0" data-t="cells">Cells</div>
+      <div class="badge"><span id="cell-count">0</span> <span data-t="cells_unit">cells</span></div>
+    </div>
+    <div class="cgrid" id="cells"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="clabel" data-t="temps">Temperatures</div>
+      <div class="temps">
+        <div class="titem"><div class="thdr"><span class="tname">MOSFET</span><span class="tval" id="mos-temp">--</span></div><div class="ttrack"><div class="tfill" id="mos-bar" style="width:0%;background:linear-gradient(90deg,#fb923c,#f87171)"></div></div></div>
+        <div class="titem"><div class="thdr"><span class="tname" data-t="sensor1">Sensor 1</span><span class="tval" id="temp1">--</span></div><div class="ttrack"><div class="tfill" id="t1-bar" style="width:0%;background:linear-gradient(90deg,#0ea5e9,#34d399)"></div></div></div>
+        <div class="titem"><div class="thdr"><span class="tname" data-t="sensor2">Sensor 2</span><span class="tval" id="temp2">--</span></div><div class="ttrack"><div class="tfill" id="t2-bar" style="width:0%;background:linear-gradient(90deg,#0ea5e9,#34d399)"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel" data-t="daily_peaks">Daily peaks</div>
+      <div class="m3grid">
+        <div class="m3"><div class="m3v" id="max-charge">--</div><div class="m3l" data-t="peak_chg">Peak chg ▲</div></div>
+        <div class="m3"><div class="m3v" id="max-discharge">--</div><div class="m3l" data-t="peak_dis">Peak dis ▼</div></div>
+        <div class="m3"><div class="m3v" id="set-bal">--</div><div class="m3l" data-t="bal_start">Balance start</div></div>
+      </div>
+      <div class="ilist" style="margin-top:16px">
+        <div class="ir"><span class="ik" data-t="delta_cells">Δ between cells</span><span class="iv" id="cell-delta">--</span></div>
+        <div class="ir"><span class="ik" data-t="hi_lo">Highest / lowest</span><span class="iv" id="cell-hilo">--</span></div>
+        <div class="ir"><span class="ik" data-t="balancer">Balancer</span><span class="iv" id="cell-balance">--</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SOCKETS (the tab exists only when sockets are configured) ══════════ -->
+<section class="tabpane" data-tab="sockets">
+  <div class="card">
+    <div class="clabel" data-t="sock_title">Sockets by state of charge</div>
+    <div class="sock-hint" data-t="sock_hint">A socket in Auto turns on when the battery reaches its "on" level and off when it falls to its "off" level. In Manual it stays the way you set it.</div>
+  </div>
+  <div class="grid2" id="sockets-row"></div>
+</section>
+
+<!-- ══════════ SYSTEM ══════════ -->
+<section class="tabpane" data-tab="system">
+  <div class="grid3">
+    <div class="card">
+      <div class="clabel" data-t="device">Device</div>
+      <div class="ilist">
+        <div class="ir"><span class="ik" data-t="model">Model</span><span class="iv" id="dev-model">--</span></div>
+        <div class="ir"><span class="ik" data-t="serial">Serial no.</span><span class="iv" id="dev-serial">--</span></div>
+        <div class="ir"><span class="ik">HW / SW</span><span class="iv" id="dev-hw">--</span></div>
+        <div class="ir"><span class="ik" data-t="mfg">Manufactured</span><span class="iv" id="dev-date">--</span></div>
+        <div class="ir"><span class="ik" data-t="checksum_errors">Checksum errors</span><span class="iv" id="dev-errors">--</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel"><span data-t="cap_cycles">Capacity &amp; cycles</span> <span class="badge" style="margin-left:6px" data-t="from_bms">from BMS</span></div>
+      <div class="ilist">
+        <div class="ir"><span class="ik" data-t="nominal">Nominal capacity</span><span class="iv" id="bat-nominal">--</span></div>
+        <div class="ir"><span class="ik" data-t="remaining">Remaining</span><span class="iv" id="bat-remain">--</span></div>
+        <div class="ir"><span class="ik" data-t="cycled">Cycled</span><span class="iv" id="bat-cycled">--</span></div>
+        <div class="ir"><span class="ik" data-t="cycle_count">Cycle count</span><span class="iv" id="bat-cycles">--</span></div>
+        <div class="ir"><span class="ik">SOH</span><span class="iv" id="bat-soh">--</span></div>
+        <div class="ir"><span class="ik" data-t="runtime">Running time</span><span class="iv" id="bat-runtime">--</span></div>
+        <div class="ir"><span class="ik" data-t="mos">MOSFET chg / dis</span><span class="iv" id="bat-mos">--</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="clabel" data-t="bms_settings">BMS settings</div>
+      <div class="ilist">
+        <div class="ir"><span class="ik">Cell OVP / UVP</span><span class="iv" id="set-ovpuvp">--</span></div>
+        <div class="ir"><span class="ik" data-t="bal_from">Balance from / delta</span><span class="iv" id="set-baldet">--</span></div>
+        <div class="ir"><span class="ik" data-t="max_cd">Max chg / dis</span><span class="iv" id="set-maxcd">--</span></div>
+        <div class="ir"><span class="ik" data-t="capacity">Capacity</span><span class="iv" id="set-cap">--</span></div>
+        <div class="ir"><span class="ik" data-t="cells_n">Cell count</span><span class="iv" id="set-cells">--</span></div>
+        <div class="ir"><span class="ik" data-t="switches">Chg / dis / balancer</span><span class="iv" id="set-switches">--</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Bottom bar for phones. Hidden on wide screens, see @media in the CSS. -->
+<nav class="tabbar" id="tabs-bottom"></nav>
+
+<script src="/static/app.js"></script>
+<script src="/static/chart.js"></script>
+<script>start();</script>
+</body>
+</html>

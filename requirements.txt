@@ -1,0 +1,7 @@
+# Known to work with: bleak 3.0, fastapi 0.137, uvicorn 0.49, websockets 16 (Python 3.13)
+bleak>=0.22
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Optional, only for switching Tapo smart plugs (see README):
+#   pip install tapo        (known to work with tapo 0.9)

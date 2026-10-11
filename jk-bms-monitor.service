@@ -1,0 +1,20 @@
+# Example systemd unit. Copy to /etc/systemd/system/, then set User and the
+# two paths below to where you cloned the project.
+[Unit]
+Description=JK BMS Monitor (Bluetooth reader and web dashboard)
+After=network.target bluetooth.target
+Wants=bluetooth.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/jk-bms-monitor
+ExecStart=/home/pi/jk-bms-monitor/venv/bin/python /home/pi/jk-bms-monitor/monitor.py
+Environment=PYTHONUNBUFFERED=1
+# lets the service use Bluetooth without adding the user to the group for good
+SupplementaryGroups=bluetooth
+Restart=always
+RestartSec=8s
+
+[Install]
+WantedBy=multi-user.target

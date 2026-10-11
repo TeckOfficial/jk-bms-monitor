@@ -1,0 +1,11 @@
+# your own settings and data
+config.json
+history.json
+history.tmp
+frames.txt
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/

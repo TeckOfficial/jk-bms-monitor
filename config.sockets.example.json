@@ -1,0 +1,15 @@
+{
+  "address": "C8:47:80:XX:XX:XX",
+  "sockets": {
+    "tapo_email": "you@example.com",
+    "tapo_password": "your TP-Link account password",
+    "on_soc": 95,
+    "off_soc": 90,
+    "check_interval": 30,
+    "bms_stale_min": 10,
+    "devices": [
+      {"name": "Water heater", "ip": "192.168.1.50"},
+      {"name": "Pool pump", "ip": "192.168.1.51", "on_soc": 80, "off_soc": 60}
+    ]
+  }
+}
